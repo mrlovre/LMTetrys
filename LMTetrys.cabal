@@ -7,10 +7,13 @@ author:         frka
 executable LMTetrys
   hs-source-dirs:  src
   main-is:         Main.hs
-  build-depends:   
+  build-depends:
                    base >= 4,
                    GLUT,
-                   transformers
+                   transformers,
+                   vector,
+                   mtl
+
   ghc-options:     -Wall
   other-modules:   Display
 

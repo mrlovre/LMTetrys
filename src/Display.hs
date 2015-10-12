@@ -34,9 +34,7 @@ drawNGon c (Position x_ y_) n_ d_ phi = do
             return $ Vertex2 (x + dx) (y + dy)
 
 clearScreen :: IO ()
-clearScreen = do
-    clearColor $= blackBG
-    clear [ColorBuffer]
+clearScreen = clearColor $= blackBG >> clear [ColorBuffer]
 
 reshape :: ReshapeCallback
 reshape size@(Size w_ h_) = do
