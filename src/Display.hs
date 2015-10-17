@@ -5,33 +5,18 @@ import           Control.Monad.Trans.Reader
 import           Graphics.UI.GLUT
 
 import           Colors
-import           Model
-import           Util
+import           Drawable
+import           SData
 
-type DisplayReaderCallback = ReaderT Config IO ()
+type DisplayReaderCallback = ReaderT SData IO ()
 
 display :: DisplayReaderCallback
 display = do
+    b <- asks board
     lift $ do
         clearScreen
-        drawNGon yellow (Position 0 0) 7 100 (3 * pi / 14)
+        draw b 20 (Position 0 0)
         flush
-
-drawSquare :: ColorFG -> GLint -> IO ()
-drawSquare c d = do
-    color c
-    renderPrimitive Polygon $
-        mapM_ vertex [Vertex2 x y | (x, y) <- [(-d, -d), (-d, d), (d, d), (d, -d)]]
-
-drawNGon :: ColorFG -> Position -> GLint -> GLint -> GLfloat -> IO ()
-drawNGon c (Position x_ y_) n_ d_ phi = do
-    let [x, y, d, n] = map fromIntegral [x_, y_, d_, n_] :: [GLfloat]
-    color c
-    renderPrimitive Polygon $
-        mapM_ vertex $ do
-            let cossin = (,) <$> cos <*> sin
-            (dx, dy) <- map (onTuple (d *) . cossin . (+ phi) . ((2 * pi / n) *)) [1 .. n]
-            return $ Vertex2 (x + dx) (y + dy)
 
 clearScreen :: IO ()
 clearScreen = clearColor $= blackBG >> clear [ColorBuffer]

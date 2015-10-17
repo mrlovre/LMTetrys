@@ -3,11 +3,10 @@ module Main where
 import           Control.Monad.Trans.Reader
 import           Graphics.UI.GLUT
 
+import           Config
 import           Display
-import           Model
-
-config :: Config
-config = defaultConfig
+import           SData
+import           Test
 
 main :: IO ()
 main = do
@@ -15,6 +14,6 @@ main = do
     initialDisplayMode $= [RGBMode]
     _ <- getArgsAndInitialize
     _ <- createWindow "test"
-    displayCallback $= runReaderT display config
+    displayCallback $= runReaderT display (SData defaultConfig testBoard)
     reshapeCallback $= Just reshape
     mainLoop

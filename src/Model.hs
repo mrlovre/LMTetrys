@@ -6,21 +6,18 @@ import           Data.Vector         (Vector, (!), (//))
 import qualified Data.Vector         as V
 import           Graphics.UI.GLUT    hiding (get)
 
-import           Colors
-
-data Config = Config {
-              width  :: GLsizei,
-              height :: GLsizei }
-
-defaultConfig :: Config
-defaultConfig = Config 800 600
+import           Drawable
+import           Jewel
+import           Util
 
 type Cell = Maybe Jewel
 
 data Board = Board {
-             rows  :: Int,
-             cols  :: Int,
-             bData :: Vector (Vector Cell) }
+             rows     :: Int,
+             cols     :: Int,
+             bData    :: Vector (Vector Cell),
+             piece    :: Vector Jewel,
+             piecePos :: (Int, Int) }
 
 (#) :: Board -> (Int, Int) -> Cell
 b # (i, j) = (bData b) ! i ! j
@@ -31,20 +28,19 @@ updateIndex (i, j) c b = b { bData = updRow } where
     updCol = obData ! i // [(j, c)]
     obData = bData b
 
-updateIndexes :: Board -> [((Int, Int), Cell)] -> Board
-updateIndexes = foldl (\b (pos, c) -> updateIndex pos c b)
+updateIndices :: Board -> [((Int, Int), Cell)] -> Board
+updateIndices = foldl (\b (pos, c) -> updateIndex pos c b)
 
 row :: Board -> Int -> Vector Cell
 row b r = bData b ! r
 
 col :: Board -> Int -> Vector Cell
-col b c = V.fromList [row b i ! c | i <- [0 .. (rows b) - 1]]
+col b c = V.fromList [row b i ! c | i <- [0 .. rows b - 1]]
 
 fallAll :: Board -> Board
 fallAll b = nb where
     nb = foldl (\b' pos -> execState (update pos) b') b indexes
     indexes = [(r, c) | c <- [0 .. cols b - 1], r <- [0 .. rows b - 1]]
-    update :: (Int, Int) -> State Board ()
     update pos@(r, c) = do
         cell <- (# pos) <$> get
         when (not $ isJust cell) $ do
@@ -54,24 +50,20 @@ fallAll b = nb where
                     let above = b' # (r', c)
                     modify (updateIndex pos above)
                     modify (updateIndex (r', c) Nothing)
-                Nothing -> return ()
-
-data Jewel = Ruby | Sapphire
-
-class Colored a where
-    getColor :: a -> ColorFG
-
-instance Colored Jewel where
-    getColor j = case j of
-        Ruby     -> red
-        Sapphire -> blue
-
-instance Show Jewel where
-    show j = case j of
-        Ruby     -> "R"
-        Sapphire -> "S"
+                Nothing -> return () :: State Board ()
 
 instance Show Board where
-    show Board { bData = bData } = unlines $ V.toList $ V.reverse $ V.map (concatMap shower . V.toList) bData where
+    show Board { bData = bd } = unlines $ V.toList $ V.reverse $ V.map (concatMap shower . V.toList) bd where
         shower (Just j) = show j
         shower Nothing = " "
+
+instance Drawable Board where
+    draw b s p = do
+        V.imapM_ (\i -> V.imapM_ (\j c -> onM (drawC i j) c)) (bData b)
+        V.imapM_ (\i j -> drawC (2 - i + pr) pc j) (piece b)
+        where
+            (pr, pc) = piecePos b
+            drawC i j x = draw x s (((-0.5 :: Double) `scaleP` p) `addP` (Position ((fromIntegral j) * s * 2) ((fromIntegral i) * s * 2)))
+            onM f x = case x of
+                Just c -> f c
+                Nothing -> return ()
