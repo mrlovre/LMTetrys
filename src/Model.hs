@@ -20,7 +20,7 @@ data Board = Board {
              piecePos :: (Int, Int) }
 
 (#) :: Board -> (Int, Int) -> Cell
-b # (i, j) = (bData b) ! i ! j
+b # (i, j) = bData b ! i ! j
 
 updateIndex :: (Int, Int) -> Cell -> Board -> Board
 updateIndex (i, j) c b = b { bData = updRow } where
@@ -43,14 +43,17 @@ fallAll b = nb where
     indexes = [(r, c) | c <- [0 .. cols b - 1], r <- [0 .. rows b - 1]]
     update pos@(r, c) = do
         cell <- (# pos) <$> get
-        when (not $ isJust cell) $ do
+        unless (isJust cell) $ do
             b' <- get
-            case fst <$> (V.find (isJust . snd) (V.drop r $ V.indexed $ col b' c)) of
+            case fst <$> V.find (isJust . snd) (V.drop r $ V.indexed $ col b' c) of
                 Just r' -> do
                     let above = b' # (r', c)
                     modify (updateIndex pos above)
                     modify (updateIndex (r', c) Nothing)
                 Nothing -> return () :: State Board ()
+
+movePiece :: Board -> (Int, Int) -> Board
+movePiece board@(Board { piecePos = (x, y) }) (dx, dy) = board { piecePos = (x + dx, y + dy) }
 
 instance Show Board where
     show Board { bData = bd } = unlines $ V.toList $ V.reverse $ V.map (concatMap shower . V.toList) bd where
@@ -63,7 +66,7 @@ instance Drawable Board where
         V.imapM_ (\i j -> drawC (2 - i + pr) pc j) (piece b)
         where
             (pr, pc) = piecePos b
-            drawC i j x = draw x s (((-0.5 :: Double) `scaleP` p) `addP` (Position ((fromIntegral j) * s * 2) ((fromIntegral i) * s * 2)))
+            drawC i j x = draw x s (((-0.5 :: Double) `scaleP` p) `addP` Position (fromIntegral j * s * 2) (fromIntegral i * s * 2))
             onM f x = case x of
                 Just c -> f c
                 Nothing -> return ()

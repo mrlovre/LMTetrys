@@ -1,19 +1,30 @@
-name:           LMTetrys
-version:        0.1
-cabal-version:  >=1.2
-build-type:     Simple
-author:         frka
+name: LMTetrys
+version: 0.1
+cabal-version: >=1.2
+build-type: Simple
+license: UnspecifiedLicense
+author: frka
 
 executable LMTetrys
-  hs-source-dirs:  src
-  main-is:         Main.hs
-  build-depends:
-                   base >= 4,
-                   GLUT,
-                   transformers,
-                   vector,
-                   mtl
-
-  ghc-options:     -Wall
-  other-modules:   Display
+    main-is: Main.hs
+    build-depends:
+        base -any,
+        GLUT -any,
+        transformers -any,
+        vector -any,
+        mtl -any
+    hs-source-dirs: src
+    other-modules:
+        Colored
+        Colors
+        Config
+        Display
+        Draw
+        Drawable
+        Idle
+        Jewel
+        Model
+        SData
+        Util
+    ghc-options: -Wall
 

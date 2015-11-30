@@ -12,8 +12,9 @@ type DisplayReaderCallback = ReaderT SData IO ()
 
 display :: DisplayReaderCallback
 display = do
-    b <- asks board
+    boardVar <- asks board
     lift $ do
+        b <- get boardVar
         clearScreen
         draw b 20 (Position 0 0)
         flush

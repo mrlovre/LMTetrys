@@ -1,10 +1,13 @@
 module Main where
 
 import           Control.Monad.Trans.Reader
+import           Data.IORef
 import           Graphics.UI.GLUT
 
 import           Config
+import Controllers
 import           Display
+import           Idle
 import           SData
 import           Test
 
@@ -14,6 +17,9 @@ main = do
     initialDisplayMode $= [RGBMode]
     _ <- getArgsAndInitialize
     _ <- createWindow "test"
-    displayCallback $= runReaderT display (SData defaultConfig testBoard)
+    tb <- newIORef testBoard
+    displayCallback $= runReaderT display (SData defaultConfig tb)
+    keyboardMouseCallback $= Just (keyboardMouse tb)
     reshapeCallback $= Just reshape
+    idleCallback $= Just idle
     mainLoop
