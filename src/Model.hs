@@ -19,6 +19,14 @@ data Board = Board {
              piece    :: Vector Jewel,
              piecePos :: (Int, Int) }
 
+newtype Direction = Direction (Int, Int)
+
+up, down, left, right :: Direction
+up = Direction (1, 0)
+down = Direction (-1, 0)
+left = Direction (0, -1)
+right = Direction (0, 1)
+
 (#) :: Board -> (Int, Int) -> Cell
 b # (i, j) = bData b ! i ! j
 
@@ -52,8 +60,18 @@ fallAll b = nb where
                     modify (updateIndex (r', c) Nothing)
                 Nothing -> return () :: State Board ()
 
-movePiece :: Board -> (Int, Int) -> Board
-movePiece board@(Board { piecePos = (x, y) }) (dx, dy) = board { piecePos = (x + dx, y + dy) }
+movePiece :: Board -> Direction -> Board
+movePiece board@(Board { piecePos = (r, c) }) (Direction (dr, dc)) = board { piecePos = (r + dr, c + dc) }
+
+movePieceConstrained :: Board -> Direction -> Board
+movePieceConstrained board (Direction (dr, dc)) = let
+    (r, c) = piecePos board
+    nr = (r + dr) `clamp` (rows board - 1)
+    nc = (c + dc) `clamp` (cols board - 1)
+    nPos = (nr, nc)
+    in if isNothing (board # nPos)
+        then board { piecePos = nPos }
+        else board
 
 instance Show Board where
     show Board { bData = bd } = unlines $ V.toList $ V.reverse $ V.map (concatMap shower . V.toList) bd where

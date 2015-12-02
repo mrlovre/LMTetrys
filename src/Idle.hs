@@ -1,6 +1,13 @@
 module Idle where
 
-import Graphics.UI.GLUT
+import           Data.IORef
+import           Graphics.UI.GLUT
 
-idle :: IdleCallback
-idle = return ()
+import           Model
+
+registerBoardUpdater :: (IdleCallback -> IO ()) -> IORef Board -> IO ()
+registerBoardUpdater f b = do
+    b $~ fallAll
+    b $~ (`movePieceConstrained` down)
+    f (registerBoardUpdater f b)
+    postRedisplay Nothing

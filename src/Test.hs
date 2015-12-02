@@ -6,9 +6,12 @@ import           Model
 import Jewel
 
 testBoard :: Board
-testBoard = Board { rows = 2, cols = 3, bData = testBoardData, piece = V.fromList [Ruby, Ruby, Sapphire], piecePos = (4, 1) }
+testBoard = Board { rows = 5, cols = 3, bData = testBoardData, piece = V.fromList [Ruby, Emerald, Sapphire], piecePos = (4, 1) }
 
 testBoardData :: Vector (Vector Cell)
 testBoardData = V.fromList $ map V.fromList [
     [Nothing, Just Ruby, Just Sapphire],
-    [Just Sapphire, Just Sapphire, Nothing]]
+    [Just Sapphire, Just Sapphire, Nothing],
+    [Nothing, Nothing, Nothing],
+    [Nothing, Nothing, Nothing],
+    [Nothing, Nothing, Nothing]]

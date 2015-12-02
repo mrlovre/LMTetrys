@@ -6,12 +6,13 @@ import           Graphics.UI.GLUT
 import           Model
 
 keyboardMouse :: IORef Board -> KeyboardMouseCallback
-keyboardMouse boardVar key state mods (Position x y) = do
+keyboardMouse boardVar key Down _ _ = do
     boardVar $~ case key of
-        SpecialKey KeyLeft  -> (`movePiece` (-1, 0))
-        SpecialKey KeyRight -> (`movePiece` (1, 0))
-        SpecialKey KeyUp    -> (`movePiece` (0, -1))
-        SpecialKey KeyDown  -> (`movePiece` (0, 1))
+        SpecialKey KeyLeft  -> (`movePieceConstrained` left)
+        SpecialKey KeyRight -> (`movePieceConstrained` right)
+        SpecialKey KeyUp    -> (`movePieceConstrained` up)
+        SpecialKey KeyDown  -> (`movePieceConstrained` down)
         _ -> id
     postRedisplay Nothing
-    undefined
+
+keyboardMouse _ _ _ _ _ = return ()
